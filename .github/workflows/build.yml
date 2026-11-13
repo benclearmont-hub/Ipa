@@ -1,0 +1,31 @@
+name: Build GDModMenu Dylib
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile GDModMenu.dylib (arm64 iOS)
+        run: |
+          SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+          clang++ -arch arm64 \
+            -isysroot "$SDK_PATH" \
+            -miphoneos-version-min=14.0 \
+            -dynamiclib \
+            -fobjc-arc \
+            -framework UIKit \
+            -framework Foundation \
+            GDModMenu.mm \
+            -o GDModMenu.dylib
+
+      - name: Upload Dylib Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GDModMenu-dylib
+          path: GDModMenu.dylib
